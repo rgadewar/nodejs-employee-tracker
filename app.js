@@ -1,14 +1,9 @@
-// app.js
 const express = require('express');
+const inquirer = require('inquirer');
 const app = express();
 const pool = require('./db');
 
-const inquirer = require('inquirer');
-require('dotenv').config();
-
 const PORT = process.env.PORT || 3001;
-
-const dbUrl = process.env.DATABASE_URL; // New line to get the DATABASE_URL environment variable
 
 // Define the root route
 app.get('/', (req, res) => {
@@ -17,9 +12,8 @@ app.get('/', (req, res) => {
 
 // Start the server and listen on the specified port
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-
+  console.log(`Server is running on port ${PORT}`);
+});
 // Function to display the main menu options
 function displayMainMenu() {
   inquirer
