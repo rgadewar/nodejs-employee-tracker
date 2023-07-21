@@ -1,22 +1,14 @@
+// app.js
 const express = require('express');
 const app = express();
+const pool = require('./db');
 
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3001;
 
-// Create the MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const dbUrl = process.env.DATABASE_URL; // New line to get the DATABASE_URL environment variable
 
 // Define the root route
 app.get('/', (req, res) => {
