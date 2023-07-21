@@ -1,7 +1,11 @@
+const express = require('express');
+const app = express();
+
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 require('dotenv').config();
 
+const PORT = process.env.PORT || 3001;
 
 // Create the MySQL connection pool
 const pool = mysql.createPool({
@@ -13,6 +17,11 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
+// Start the server and listen on the specified port
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 
 // Function to display the main menu options
 function displayMainMenu() {
