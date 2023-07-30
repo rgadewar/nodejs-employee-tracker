@@ -7,7 +7,7 @@ const { printTable } = require('console-table-printer');
 const figlet = require('figlet');
 const displayMainMenu = require('./utils/employeeFunctions');
 const connection = require('./config/connection');
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 3001;
 
 // Define the root route
 app.get('/', (req, res) => {
