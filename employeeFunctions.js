@@ -5,9 +5,6 @@ const figlet = require('figlet');
 
 // Function to display the main menu options
 function displayMainMenu() {
-  figlet('NODEJS-Employee Tracker', (err, result) => {
-    console.log(err || result);
-  });
   inquirer
     .prompt([
       {
