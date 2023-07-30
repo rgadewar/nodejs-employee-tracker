@@ -5,7 +5,7 @@ const mysql = require('mysql2');
 const app = express();
 const { printTable } = require('console-table-printer');
 const figlet = require('figlet');
-const displayMainMenu = require('./employeeFunctions');
+const displayMainMenu = require('./utils/employeeFunctions');
 const connection = require('./config/connection');
 const PORT = process.env.PORT || 3008;
 
