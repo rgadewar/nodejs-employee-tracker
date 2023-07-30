@@ -13,6 +13,8 @@ I WANT to be able to delete notes I've written before
 
 SO THAT I can organize my thoughts and keep track of tasks I need to complete
 
+## App working example
+[Video Link](https://drive.google.com/file/d/1WFKr8Cew7IF_XivMCecyV-SwmJPqT6Wm/view)
 
 ## Table of contents
 

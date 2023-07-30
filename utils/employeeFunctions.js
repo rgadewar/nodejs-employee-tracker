@@ -186,78 +186,75 @@ function viewAllRoles() {
   }
   
   // Function to add an employee
-  function addEmployee() {
-    // Fetch role titles and ids to show as choices when adding an employee
-    pool.query('SELECT id, title FROM role', (err, roles) => {
-      if (err) {
-        console.error('Error fetching roles:', err);
-        displayMainMenu();
-      } else {
-        // Fetch employee names and ids to show as choices when adding a manager
-        pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', (err, employees) => {
-          if (err) {
-            console.error('Error fetching employees:', err);
-            displayMainMenu();
-          } else {
-            inquirer
-              .prompt([
-                {
-                  type: 'input',
-                  name: 'firstName',
-                  message: "Enter the employee's first name:",
-                  validate: (value) => {
-                    if (value.trim() !== '') {
-                      return true;
-                    }
-                    return "Please enter the employee's first name.";
-                  },
-                },
-                {
-                  type: 'input',
-                  name: 'lastName',
-                  message: "Enter the employee's last name:",
-                  validate: (value) => {
-                    if (value.trim() !== '') {
-                      return true;
-                    }
-                    return "Please enter the employee's last name.";
-                  },
-                },
-                {
-                  type: 'list',
-                  name: 'roleId',
-                  message: "Select the employee's role:",
-                  choices: roles.map((role) => ({ name: role.title, value: role.id })),
-                },
-                {
-                  type: 'list',
-                  name: 'managerId',
-                  message: "Select the employee's manager (optional):",
-                  choices: [{ name: 'None', value: null }, ...employees],
-                },
-              ])
-              .then((answers) => {
-                const { firstName, lastName, roleId, managerId } = answers;
-                // Implement MySQL query to add the employee to the database
-                pool.query(
-                  'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
-                  [firstName, lastName, roleId, managerId],
-                  (err, result) => {
-                    if (err) {
-                      console.error('Error adding employee:', err);
-                    } else {
-                      console.log(`Successfully added employee: ${firstName} ${lastName}`);
-                    }
-                    displayMainMenu();
+ // ... other code ...
+
+// Function to add an employee
+function addEmployee() {
+  // Fetch role titles and ids to show as choices when adding an employee
+  pool.query('SELECT id, title FROM role', (err, roles) => {
+    if (err) {
+      console.error('Error fetching roles:', err);
+      displayMainMenu();
+    } else {
+      // Fetch employee names and ids to show as choices when adding a manager
+      pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', (err, employees) => {
+        if (err) {
+          console.error('Error fetching employees:', err);
+          displayMainMenu();
+        } else {
+          inquirer
+            .prompt([
+              {
+                type: 'input',
+                name: 'firstName',
+                message: "Enter the employee's first name:",
+                // ...
+              },
+              {
+                type: 'input',
+                name: 'lastName',
+                message: "Enter the employee's last name:",
+                // ...
+              },
+              {
+                type: 'list',
+                name: 'roleId',
+                message: "Select the employee's role:",
+                choices: roles.map((role) => ({ name: role.title, value: role.id })),
+                // Use map to format roles as { name: role.title, value: role.id }
+              },
+              {
+                type: 'list',
+                name: 'managerId',
+                message: "Select the employee's manager (optional):",
+                choices: [{ name: 'None', value: null }, ...employees],
+                // Use map to format employees as { name: employee.name, value: employee.id }
+              },
+            ])
+            .then((answers) => {
+              const { firstName, lastName, roleId, managerId } = answers;
+              const finalManagerId = managerId === 'None' ? null : managerId;
+
+              // Implement MySQL query to add the employee to the database
+              pool.query(
+                'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
+                [firstName, lastName, roleId, finalManagerId],
+                (err, result) => {
+                  if (err) {
+                    console.error('Error adding employee:', err);
+                  } else {
+                    console.log(`Successfully added employee: ${firstName} ${lastName}`);
                   }
-                );
-              });
-          }
-        });
-      }
-    });
-  }
-  
+                  displayMainMenu();
+                }
+              );
+            });
+        }
+      });
+    }
+  });
+}
+
   // Function to update an employee role
   function updateEmployeeRole() {
     // Fetch employee names and ids to show as choices when updating an employee role
@@ -276,9 +273,9 @@ function viewAllRoles() {
               .prompt([
                 {
                   type: 'list',
-                  name: 'employeeId',
+                  name: 'employeeId', // The name should be 'employeeId' to capture the selected employee's ID
                   message: 'Select the employee whose role you want to update:',
-                  choices: employees,
+                  choices: employees.map((employee) => ({ name: employee.name, value: employee.id })), // Map the choices with id as value
                 },
                 {
                   type: 'list',
@@ -304,6 +301,7 @@ function viewAllRoles() {
       }
     });
   }
+  
   
 
   module.exports = displayMainMenu;
