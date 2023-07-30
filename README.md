@@ -4,8 +4,7 @@
 ## Description 
 
 Challenge is to create interfaces that allow non-developers to easily view and interact with information stored in databases. These interfaces are called content management systems (CMS).
-![Image 1](Image1.png)   
-![Image 2](Image2.png)
+![Image 1](assets/images/UI_view.png)   
 
 ## User Story
 AS A user, I want to be able to write and save notes
