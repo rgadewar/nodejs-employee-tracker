@@ -1,7 +1,7 @@
 const express = require('express');
 const inquirer = require('inquirer');
 const app = express();
-const pool = require('./db');
+const pool = require('./config/connection');
 // app.js
 const displayMainMenu = require('./employeeFunctions');
 

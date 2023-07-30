@@ -1,4 +1,4 @@
-const pool = require('./db');
+const pool = require('./config/connection');
 const inquirer = require('inquirer');
 const { printTable } = require('console-table-printer');
 const figlet = require('figlet');
