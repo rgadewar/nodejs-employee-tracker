@@ -59,11 +59,15 @@ function displayMainMenu() {
 // Function to view all departments
 function viewAllDepartments() {
   // Implement MySQL query to fetch department names and ids
-  pool.query('SELECT * FROM department', (err, results) => {
+  pool.query('SELECT id, name FROM department', (err, results) => {
     if (err) {
       console.error('Error fetching departments:', err);
     } else {
-      console.table(results);
+       // Convert the results to a simple array of objects without the index
+       const departments = results.map((row) => ({ id: row.id, name: row.name }));
+
+       // Display the departments without the index column
+       console.table(departments);
     }
     displayMainMenu();
   });
@@ -185,9 +189,7 @@ function viewAllRoles() {
     });
   }
   
-  // Function to add an employee
- // ... other code ...
-
+ // Function to add an employee
 // Function to add an employee
 function addEmployee() {
   // Fetch role titles and ids to show as choices when adding an employee
@@ -196,10 +198,10 @@ function addEmployee() {
       console.error('Error fetching roles:', err);
       displayMainMenu();
     } else {
-      // Fetch employee names and ids to show as choices when adding a manager
-      pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', (err, employees) => {
+      // Fetch managers (employees who are managers) for the inquirer prompt choices
+      pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee WHERE manager_id IS NULL', (err, managers) => {
         if (err) {
-          console.error('Error fetching employees:', err);
+          console.error('Error fetching managers:', err);
           displayMainMenu();
         } else {
           inquirer
@@ -227,13 +229,12 @@ function addEmployee() {
                 type: 'list',
                 name: 'managerId',
                 message: "Select the employee's manager (optional):",
-                choices: [{ name: 'None', value: null }, ...employees],
-                // Use map to format employees as { name: employee.name, value: employee.id }
+                choices: [{ name: 'None', value: null }, ...managers], // Use map to format managers as { name: manager.name, value: manager.id }
               },
             ])
             .then((answers) => {
               const { firstName, lastName, roleId, managerId } = answers;
-              const finalManagerId = managerId === 'None' ? null : managerId;
+              const finalManagerId = managerId === 'None' ? null : managers.find((manager) => manager.name === managerId).id;
 
               // Implement MySQL query to add the employee to the database
               pool.query(
@@ -255,53 +256,73 @@ function addEmployee() {
   });
 }
 
-  // Function to update an employee role
-  function updateEmployeeRole() {
-    // Fetch employee names and ids to show as choices when updating an employee role
-    pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', (err, employees) => {
-      if (err) {
-        console.error('Error fetching employees:', err);
-        displayMainMenu();
-      } else {
-        // Fetch role titles and ids to show as choices when updating an employee role
-        pool.query('SELECT id, title FROM role', (err, roles) => {
-          if (err) {
-            console.error('Error fetching roles:', err);
-            displayMainMenu();
-          } else {
-            inquirer
-              .prompt([
-                {
-                  type: 'list',
-                  name: 'employeeId', // The name should be 'employeeId' to capture the selected employee's ID
-                  message: 'Select the employee whose role you want to update:',
-                  choices: employees.map((employee) => ({ name: employee.name, value: employee.id })), // Map the choices with id as value
-                },
-                {
-                  type: 'list',
-                  name: 'roleId',
-                  message: 'Select the new role for the employee:',
-                  choices: roles.map((role) => ({ name: role.title, value: role.id })),
-                },
-              ])
-              .then((answers) => {
-                const { employeeId, roleId } = answers;
-                // Implement MySQL query to update the employee role in the database
-                pool.query('UPDATE employee SET role_id = ? WHERE id = ?', [roleId, employeeId], (err, result) => {
-                  if (err) {
-                    console.error('Error updating employee role:', err);
-                  } else {
-                    console.log('Employee role updated successfully.');
-                  }
-                  displayMainMenu();
-                });
-              });
-          }
-        });
-      }
-    });
-  }
-  
-  
 
-  module.exports = displayMainMenu;
+// Function to update an employee role
+function updateEmployeeRole() {
+  // Fetch employee names and ids to show as choices when updating an employee role
+  pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee', (err, employees) => {
+    if (err) {
+      console.error('Error fetching employees:', err);
+      displayMainMenu();
+    } else {
+      // Fetch managers (employees who are managers) for the inquirer prompt choices
+      pool.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employee WHERE manager_id IS NULL', (err, managers) => {
+        if (err) {
+          console.error('Error fetching managers:', err);
+          displayMainMenu();
+        } else {
+          // Fetch role titles and ids to show as choices when updating an employee role
+          pool.query('SELECT id, title FROM role', (err, roles) => {
+            if (err) {
+              console.error('Error fetching roles:', err);
+              displayMainMenu();
+            } else {
+              inquirer
+                .prompt([
+                  {
+                    type: 'list',
+                    name: 'employeeId', // The name should be 'employeeId' to capture the selected employee's ID
+                    message: 'Select the employee whose role you want to update:',
+                    choices: employees.map((employee) => ({ name: employee.name, value: employee.id })), // Map the choices with id as value
+                  },
+                  {
+                    type: 'list',
+                    name: 'roleId',
+                    message: 'Select the new role for the employee:',
+                    choices: roles.map((role) => ({ name: role.title, value: role.id })),
+                  },
+                  {
+                    type: 'list',
+                    name: 'managerId',
+                    message: "Select the employee's manager (optional):",
+                    choices: [{ name: 'None', value: null }, ...managers], // Use map to format managers as { name: manager.name, value: manager.id }
+                  },
+                ])
+                .then((answers) => {
+                  const { employeeId, roleId, managerId } = answers;
+                  const finalManagerId = managerId === 'None' ? null : managers.find((manager) => manager.name === managerId).id;
+
+                  // Implement MySQL query to update the employee role and manager in the database
+                  pool.query(
+                    'UPDATE employee SET role_id = ?, manager_id = ? WHERE id = ?',
+                    [roleId, finalManagerId, employeeId],
+                    (err, result) => {
+                      if (err) {
+                        console.error('Error updating employee role:', err);
+                      } else {
+                        console.log('Employee role updated successfully.');
+                      }
+                      displayMainMenu();
+                    }
+                  );
+                });
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
+module.exports = displayMainMenu;
+
